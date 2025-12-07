@@ -6,8 +6,8 @@ import org.gradle.kotlin.dsl.provideDelegate
 plugins {
     id("java") // Import Java plugin.
     id("java-library") // Import Java Library plugin.
-    id("com.diffplug.spotless") version "7.0.4" // Import Spotless plugin.
-    id("com.gradleup.shadow") version "8.3.6" // Import Shadow plugin.
+    id("com.diffplug.spotless") version "8.1.0" // Import Spotless plugin.
+    id("com.gradleup.shadow") version "8.3.9" // Import Shadow plugin.
     id("checkstyle") // Import Checkstyle plugin.
     eclipse // Import Eclipse plugin.
     kotlin("jvm") version "2.1.21" // Import Kotlin JVM plugin.
@@ -69,7 +69,6 @@ repositories {
 dependencies {
     compileOnly("org.purpurmc.purpur:purpur-api:1.19.4-R0.1-SNAPSHOT") // Declare Purpur API version to be packaged.
     compileOnly("io.github.miniplaceholders:miniplaceholders-api:2.2.3") // Import MiniPlaceholders API.
-    compileOnlyApi(project(":libs:Utilities-OG")) // Import TrueOG Network Utilities-OG Java API (from source).
     compileOnly(files("libs/ProtocolLib-5.0.jar")) // Import Legacy ProtocolLib API.
     compileOnly("com.mojang:brigadier:1.0.18")
     implementation("org.bstats:bstats-bukkit:3.1.0")
