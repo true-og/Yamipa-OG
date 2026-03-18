@@ -83,6 +83,25 @@ public class Internals {
     }
 
     /**
+     * Synchronize Bukkit commands with Brigadier
+     */
+    public static void syncCommands() {
+
+        try {
+
+            Method syncCommandsMethod = Bukkit.getServer().getClass().getDeclaredMethod("syncCommands");
+            syncCommandsMethod.setAccessible(true);
+            syncCommandsMethod.invoke(Bukkit.getServer());
+
+        } catch (Exception e) {
+
+            throw new RuntimeException("Failed to synchronize Bukkit commands", e);
+
+        }
+
+    }
+
+    /**
      * Get Bukkit sender from Brigadier context source
      * 
      * @param source Brigadier command context source

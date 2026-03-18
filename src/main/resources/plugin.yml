@@ -11,6 +11,13 @@ softdepend:
   - Towny
   - WorldGuard
 
+commands:
+  yamipa:
+    description: Manage Yamipa images
+    usage: /yamipa [subcommand]
+    aliases:
+      - image
+
 permissions:
   # All plugin permissions
   yamipa.*:
