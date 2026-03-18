@@ -5,6 +5,8 @@
 [![bStats Servers](https://img.shields.io/bstats/servers/10243)](https://bstats.org/plugin/bukkit/Yamipa/10243)
 [![License](https://img.shields.io/github/license/josemmo/yamipa)](LICENSE)
 
+Yamipa-OG is a fork of Yamipa maintained by [TrueOG Network](https://github.com/true-og/Yamipa-OG) for Purpur 1.19.4.
+
 Yamipa is a Spigot plugin that allows players to place images (even **animated**!) on any surface in your Minecraft server
 without having to install any local client mod.
 
