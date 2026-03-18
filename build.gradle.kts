@@ -104,7 +104,7 @@ tasks.shadowJar {
     exclude("META-INF/**")
     exclude("LICENSE")
     archiveClassifier.set("") // Use empty string instead of null.
-    archiveFileName.set("Yamipa-${project.version}-.jar")
+    archiveFileName.set("Yamipa-${project.version}.jar")
 }
 
 tasks.jar {

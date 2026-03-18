@@ -1,234 +1,249 @@
 package io.josemmo.bukkit.plugin;
 
-import io.josemmo.bukkit.plugin.commands.ImageCommandBridge;
-import io.josemmo.bukkit.plugin.renderer.*;
-import io.josemmo.bukkit.plugin.storage.ImageStorage;
-import org.bukkit.Bukkit;
-import org.bukkit.event.HandlerList;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import java.awt.Color;
 import java.nio.file.Path;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
+import org.bukkit.event.HandlerList;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import io.josemmo.bukkit.plugin.commands.ImageCommandBridge;
+import io.josemmo.bukkit.plugin.renderer.FakeEntity;
+import io.josemmo.bukkit.plugin.renderer.FakeImage;
+import io.josemmo.bukkit.plugin.renderer.FakeMap;
+import io.josemmo.bukkit.plugin.renderer.ImageRenderer;
+import io.josemmo.bukkit.plugin.renderer.ItemService;
+import io.josemmo.bukkit.plugin.storage.ImageStorage;
+import net.trueog.utilitiesog.UtilitiesOG;
+
 public class YamipaPlugin extends JavaPlugin {
 
-    public static final int BSTATS_PLUGIN_ID = 10243;
-    private static YamipaPlugin instance;
-    private boolean verbose;
-    private ImageStorage storage;
-    private ImageRenderer renderer;
-    private ItemService itemService;
-    private ScheduledExecutorService scheduler;
+	private static YamipaPlugin instance;
+	private boolean verbose;
+	private ImageStorage storage;
+	private ImageRenderer renderer;
+	private ItemService itemService;
+	private ScheduledExecutorService scheduler;
 
-    /**
-     * Get plugin instance
-     * 
-     * @return Plugin instance
-     */
-    public static @NotNull YamipaPlugin getInstance() {
+	/**
+	 * Get plugin instance
+	 * 
+	 * @return Plugin instance
+	 */
+	public static @NotNull YamipaPlugin getInstance() {
 
-        return instance;
+		return instance;
 
-    }
+	}
 
-    /**
-     * Get image storage instance
-     * 
-     * @return Image storage instance
-     */
-    public @NotNull ImageStorage getStorage() {
+	public static String getPrefix() {
 
-        return storage;
+		return "&7[&eYamipa&f-&4OG&7] ";
 
-    }
+	}
 
-    /**
-     * Get image renderer instance
-     * 
-     * @return Image renderer instance
-     */
-    public @NotNull ImageRenderer getRenderer() {
+	/**
+	 * Get image storage instance
+	 * 
+	 * @return Image storage instance
+	 */
+	public @NotNull ImageStorage getStorage() {
 
-        return renderer;
+		return storage;
 
-    }
+	}
 
-    /**
-     * Get internal tasks scheduler
-     * 
-     * @return Tasks scheduler
-     */
-    public @NotNull ScheduledExecutorService getScheduler() {
+	/**
+	 * Get image renderer instance
+	 * 
+	 * @return Image renderer instance
+	 */
+	public @NotNull ImageRenderer getRenderer() {
 
-        return scheduler;
+		return renderer;
 
-    }
+	}
 
-    @Override
-    public void onLoad() {
+	/**
+	 * Get internal tasks scheduler
+	 * 
+	 * @return Tasks scheduler
+	 */
+	public @NotNull ScheduledExecutorService getScheduler() {
 
-        instance = this;
+		return scheduler;
 
-    }
+	}
 
-    @Override
-    public void onEnable() {
+	@Override
+	public void onLoad() {
 
-        // Initialize logger
-        verbose = getConfig().getBoolean("verbose", false);
-        if (verbose) {
+		instance = this;
 
-            info("Running on VERBOSE mode");
+	}
 
-        }
+	@Override
+	public void onEnable() {
 
-        // Register plugin commands
-        ImageCommandBridge.register(this);
+		// Initialize logger
+		verbose = getConfig().getBoolean("verbose", false);
+		if (verbose) {
 
-        // Read plugin configuration paths
-        Path basePath = getDataFolder().toPath();
-        String imagesPath = getConfig().getString("images-path", "images");
-        String cachePath = getConfig().getString("cache-path", "cache");
-        String dataPath = getConfig().getString("data-path", "images.dat");
+			info("Running on VERBOSE mode");
 
-        // Create image storage
-        storage = new ImageStorage(basePath.resolve(imagesPath).toString(), basePath.resolve(cachePath).toString());
-        try {
+		}
 
-            storage.start();
+		// Register plugin commands
+		ImageCommandBridge.register(this);
 
-        } catch (Exception e) {
+		// Read plugin configuration paths
+		final Path basePath = getDataFolder().toPath();
+		final String imagesPath = getConfig().getString("images-path", "images");
+		final String cachePath = getConfig().getString("cache-path", "cache");
+		final String dataPath = getConfig().getString("data-path", "images.dat");
 
-            log(Level.SEVERE, "Failed to initialize image storage", e);
+		// Create image storage
+		storage = new ImageStorage(basePath.resolve(imagesPath).toString(), basePath.resolve(cachePath).toString());
+		try {
 
-        }
+			storage.start();
 
-        // Create image renderer
-        boolean animateImages = getConfig().getBoolean("animate-images", true);
-        FakeImage.configure(animateImages);
-        info(animateImages ? "Enabled image animation support" : "Image animation support is disabled");
-        renderer = new ImageRenderer(basePath.resolve(dataPath).toString());
-        renderer.start();
+		} catch (Exception e) {
 
-        // Create image item service
-        itemService = new ItemService();
-        itemService.start();
+			log(Level.SEVERE, "Failed to initialize image storage", e);
 
-        // Create thread pool
-        scheduler = Executors.newScheduledThreadPool(6);
+		}
 
-        // Warm-up plugin dependencies
-        fine("Waiting for ProtocolLib to be ready...");
-        scheduler.execute(() -> {
+		// Create image renderer
+		final boolean animateImages = getConfig().getBoolean("animate-images", true);
+		FakeImage.configure(animateImages);
+		info(animateImages ? "Enabled image animation support" : "Image animation support is disabled");
+		renderer = new ImageRenderer(basePath.resolve(dataPath).toString());
+		renderer.start();
 
-            FakeEntity.waitForProtocolLib();
-            fine("ProtocolLib is now ready");
+		// Create image item service
+		itemService = new ItemService();
+		itemService.start();
 
-        });
-        fine("Triggered map color cache warm-up");
-        FakeMap.pixelToIndex(Color.RED.getRGB()); // Ask for a color index to force cache generation
+		// Create thread pool
+		scheduler = Executors.newScheduledThreadPool(6);
 
-    }
+		// Warm-up plugin dependencies
+		fine("Waiting for ProtocolLib to be ready...");
+		scheduler.execute(() -> {
 
-    @Override
-    public void onDisable() {
+			FakeEntity.waitForProtocolLib();
+			fine("ProtocolLib is now ready");
 
-        // Stop plugin components
-        storage.stop();
-        renderer.stop();
-        itemService.stop();
-        storage = null;
-        renderer = null;
-        itemService = null;
+		});
+		fine("Triggered map color cache warm-up");
+		FakeMap.pixelToIndex(Color.RED.getRGB()); // Ask for a color index to force cache generation
 
-        // Stop internal scheduler
-        scheduler.shutdownNow();
-        scheduler = null;
+	}
 
-        // Remove Bukkit listeners and tasks
-        HandlerList.unregisterAll(this);
-        Bukkit.getScheduler().cancelTasks(this);
+	@Override
+	public void onDisable() {
 
-    }
+		// Stop plugin components
+		storage.stop();
+		renderer.stop();
+		itemService.stop();
+		storage = null;
+		renderer = null;
+		itemService = null;
 
-    /**
-     * Log message
-     * 
-     * @param level   Record level
-     * @param message Message
-     * @param e       Throwable instance, NULL to ignore
-     */
-    public void log(@NotNull Level level, @NotNull String message, @Nullable Throwable e) {
+		// Stop internal scheduler
+		scheduler.shutdownNow();
+		scheduler = null;
 
-        // Fix log level
-        if (level.intValue() < Level.INFO.intValue()) {
+		// Remove Bukkit listeners and tasks
+		HandlerList.unregisterAll(this);
+		Bukkit.getScheduler().cancelTasks(this);
 
-            if (!verbose)
-                return;
-            level = Level.INFO;
+	}
 
-        }
+	/**
+	 * Log message
+	 * 
+	 * @param level   Record level
+	 * @param message Message
+	 * @param e       Throwable instance, NULL to ignore
+	 */
+	public void log(@NotNull Level level, @NotNull String message, @Nullable Throwable e) {
 
-        // Proxy record to real logger
-        if (e == null) {
+		// Fix log level
+		if (level.intValue() < Level.INFO.intValue()) {
 
-            getLogger().log(level, message);
+			if (!verbose) {
+				return;
+			}
+			level = Level.INFO;
 
-        } else {
+		}
 
-            getLogger().log(level, message, e);
+		// Proxy record to real logger
+		if (e == null) {
 
-        }
+			UtilitiesOG.logToConsole(getPrefix(), message);
 
-    }
+		} else {
 
-    /**
-     * Log message
-     * 
-     * @param level   Record level
-     * @param message Message
-     */
-    public void log(@NotNull Level level, @NotNull String message) {
+			UtilitiesOG.logToConsole(getPrefix(), message);
 
-        log(level, message, null);
+			e.printStackTrace();
 
-    }
+		}
 
-    /**
-     * Log warning message
-     * 
-     * @param message Message
-     */
-    public void warning(@NotNull String message) {
+	}
 
-        log(Level.WARNING, message);
+	/**
+	 * Log message
+	 * 
+	 * @param level   Record level
+	 * @param message Message
+	 */
+	public void log(@NotNull Level level, @NotNull String message) {
 
-    }
+		log(level, message, null);
 
-    /**
-     * Log info message
-     * 
-     * @param message Message
-     */
-    public void info(@NotNull String message) {
+	}
 
-        log(Level.INFO, message);
+	/**
+	 * Log warning message
+	 * 
+	 * @param message Message
+	 */
+	public void warning(@NotNull String message) {
 
-    }
+		log(Level.WARNING, message);
 
-    /**
-     * Log fine message
-     * 
-     * @param message Message
-     */
-    public void fine(@NotNull String message) {
+	}
 
-        log(Level.FINE, message);
+	/**
+	 * Log info message
+	 * 
+	 * @param message Message
+	 */
+	public void info(@NotNull String message) {
 
-    }
+		log(Level.INFO, message);
+
+	}
+
+	/**
+	 * Log fine message
+	 * 
+	 * @param message Message
+	 */
+	public void fine(@NotNull String message) {
+
+		log(Level.FINE, message);
+
+	}
 
 }
