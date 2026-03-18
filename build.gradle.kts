@@ -68,10 +68,9 @@ repositories {
 /* ---------------------- Java project deps ---------------------------- */
 dependencies {
     compileOnly("org.purpurmc.purpur:purpur-api:1.19.4-R0.1-SNAPSHOT") // Declare Purpur API version to be packaged.
-    compileOnly("io.github.miniplaceholders:miniplaceholders-api:2.2.3") // Import MiniPlaceholders API.
+    compileOnlyApi(project(":libs:Utilities-OG")) // Import TrueOG Network Utilities-OG Java API (from source).
     compileOnly(files("libs/ProtocolLib-5.0.jar")) // Import Legacy ProtocolLib API.
     compileOnly("com.mojang:brigadier:1.0.18")
-    implementation("org.bstats:bstats-bukkit:3.1.0")
     compileOnly("net.luckperms:api:5.5")
     compileOnly("com.github.ElgarL:groupmanager:3.2")
     compileOnly("com.sk89q.worldedit:worldedit-bukkit:7.3.0-SNAPSHOT") // Import WorldEdit API.
@@ -101,7 +100,6 @@ tasks.shadowJar {
     exclude("LICENSE")
     archiveClassifier.set("") // Use empty string instead of null.
     archiveBaseName.set("yamipa")
-    relocate("org.bstats", "${project.group}.bstats")
 }
 
 tasks.jar {

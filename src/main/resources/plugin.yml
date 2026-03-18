@@ -1,5 +1,5 @@
 name: yamipa
-version: version: '${version}'
+version: '${version}'
 main: io.josemmo.bukkit.plugin.YamipaPlugin
 api-version: '${apiVersion}'
 depend: [ProtocolLib]
