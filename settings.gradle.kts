@@ -1,4 +1,4 @@
-rootProject.name = "yamipa"
+rootProject.name = "Yamipa-OG"
 
 ProcessBuilder("sh", "bootstrap.sh").directory(rootDir).inheritIO().start().let {
     if (it.waitFor() != 0) throw GradleException("bootstrap.sh failed")

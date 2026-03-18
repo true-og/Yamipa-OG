@@ -26,7 +26,12 @@ java {
     }
 }
 
-kotlin { jvmToolchain(17) }
+kotlin {
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+        vendor.set(JvmVendorSpec.GRAAL_VM)
+    }
+}
 
 /* ----------------------------- Metadata ------------------------------ */
 group = "io.josemmo.bukkit.plugin" // Declare bundle identifier.
@@ -99,12 +104,12 @@ tasks.shadowJar {
     exclude("META-INF/**")
     exclude("LICENSE")
     archiveClassifier.set("") // Use empty string instead of null.
-    archiveBaseName.set("yamipa")
+    archiveFileName.set("Yamipa-${project.version}-.jar")
 }
 
 tasks.jar {
     archiveClassifier.set("part") // Applies to root jarfile only.
-    archiveBaseName.set("yamipa")
+    archiveFileName.set("Yamipa-${project.version}-part.jar")
 }
 
 tasks.build { dependsOn(tasks.spotlessApply, tasks.shadowJar) } // Build depends on spotless and shadow.
