@@ -1,4 +1,4 @@
-name: yamipa
+name: Yamipa-OG
 version: '${version}'
 main: io.josemmo.bukkit.plugin.YamipaPlugin
 api-version: '${apiVersion}'

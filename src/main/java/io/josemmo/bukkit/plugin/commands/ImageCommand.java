@@ -35,7 +35,7 @@ public class ImageCommand {
     public static void showHelp(@NotNull CommandSender s, @NotNull String commandName) {
 
         String cmd = "/" + commandName;
-        s.sendMessage(ChatColor.BOLD + "=== Yamipa Plugin Help ===");
+        s.sendMessage(ChatColor.BOLD + "=== Yamipa-OG Plugin Help ===");
         s.sendMessage(ChatColor.AQUA + cmd + ChatColor.RESET + " - Show this help");
         if (s.hasPermission("yamipa.command.clear") || s.hasPermission("yamipa.clear")) {
 
