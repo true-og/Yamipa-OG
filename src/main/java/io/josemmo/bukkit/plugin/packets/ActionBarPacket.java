@@ -5,6 +5,8 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import io.josemmo.bukkit.plugin.utils.Internals;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.trueog.utilitiesog.UtilitiesOG;
 import org.jetbrains.annotations.NotNull;
 
 public class ActionBarPacket extends PacketContainer {
@@ -25,7 +27,8 @@ public class ActionBarPacket extends PacketContainer {
 
     public @NotNull ActionBarPacket setText(@NotNull String text) {
 
-        getChatComponents().write(0, WrappedChatComponent.fromText(text));
+        String serialized = GsonComponentSerializer.gson().serialize(UtilitiesOG.trueogColorize(text));
+        getChatComponents().write(0, WrappedChatComponent.fromJson(serialized));
         return this;
 
     }

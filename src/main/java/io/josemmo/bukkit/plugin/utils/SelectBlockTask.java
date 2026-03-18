@@ -2,7 +2,6 @@ package io.josemmo.bukkit.plugin.utils;
 
 import com.comphenix.protocol.events.ListenerPriority;
 import io.josemmo.bukkit.plugin.YamipaPlugin;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -20,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiConsumer;
+import net.trueog.utilitiesog.UtilitiesOG;
 
 public class SelectBlockTask {
 
@@ -76,7 +76,7 @@ public class SelectBlockTask {
         // Has this player another active task?
         if (instances.containsKey(uuid)) {
 
-            player.sendMessage(ChatColor.RED + "You already have a pending action!");
+            UtilitiesOG.trueogMessage(player, "&cYou already have a pending action!");
             return;
 
         }
@@ -92,8 +92,7 @@ public class SelectBlockTask {
 
         // Start task
         instances.put(uuid, this);
-        actionBar = ActionBar.repeat(player,
-                ChatColor.GREEN + helpMessage + ChatColor.RESET + " - " + ChatColor.RED + "Left click to cancel");
+        actionBar = ActionBar.repeat(player, "&a" + helpMessage + "&r - &cLeft click to cancel");
 
     }
 
