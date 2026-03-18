@@ -25,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import java.util.Collections;
 import java.util.Objects;
+import net.trueog.utilitiesog.UtilitiesOG;
 
 public class ItemService extends InteractWithEntityListener implements Listener {
 
@@ -53,8 +54,8 @@ public class ItemService extends InteractWithEntityListener implements Listener 
 
         // Set metadata
         PersistentDataContainer itemData = itemMeta.getPersistentDataContainer();
-        itemMeta.setDisplayName(image.getName() + ChatColor.AQUA + " (" + width + "x" + height + ")");
-        itemMeta.setLore(Collections.singletonList("Yamipa image"));
+        itemMeta.displayName(UtilitiesOG.trueogColorize(image.getName() + "&b (" + width + "x" + height + ")"));
+        itemMeta.lore(Collections.singletonList(UtilitiesOG.trueogColorize("Yamipa image")));
         itemData.set(NSK_FILENAME, PersistentDataType.STRING, image.getName());
         itemData.set(NSK_WIDTH, PersistentDataType.INTEGER, width);
         itemData.set(NSK_HEIGHT, PersistentDataType.INTEGER, height);
@@ -172,7 +173,7 @@ public class ItemService extends InteractWithEntityListener implements Listener 
         if (image == null) {
 
             plugin.warning(player + " tried to place corrupted image item (\"" + filename + "\" no longer exists)");
-            ActionBar.send(player, ChatColor.RED + "Image file \"" + filename + "\" no longer exists");
+            ActionBar.send(player, "&cImage file \"" + filename + "\" no longer exists");
             return;
 
         }
@@ -183,7 +184,7 @@ public class ItemService extends InteractWithEntityListener implements Listener 
         // Validate player permissions
         if (!player.hasPermission("yamipa.item.place")) {
 
-            ActionBar.send(player, ChatColor.RED + "You're not allowed to place image items!");
+            ActionBar.send(player, "&cYou're not allowed to place image items!");
             return;
 
         }
@@ -236,7 +237,7 @@ public class ItemService extends InteractWithEntityListener implements Listener 
         // Validate player permissions
         if (!player.hasPermission("yamipa.item.remove.own")) {
 
-            ActionBar.send(player, ChatColor.RED + "You're not allowed to remove image items!");
+            ActionBar.send(player, "&cYou're not allowed to remove image items!");
             return true;
 
         }
@@ -245,7 +246,7 @@ public class ItemService extends InteractWithEntityListener implements Listener 
                 && !player.hasPermission("yamipa.item.remove"))
         {
 
-            ActionBar.send(player, ChatColor.RED + "You cannot remove image items from other players!");
+            ActionBar.send(player, "&cYou cannot remove image items from other players!");
             return true;
 
         }

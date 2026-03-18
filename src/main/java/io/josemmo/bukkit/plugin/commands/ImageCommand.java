@@ -8,6 +8,7 @@ import io.josemmo.bukkit.plugin.storage.ImageFile;
 import io.josemmo.bukkit.plugin.utils.Permissions;
 import io.josemmo.bukkit.plugin.utils.SelectBlockTask;
 import io.josemmo.bukkit.plugin.utils.ActionBar;
+import net.trueog.utilitiesog.UtilitiesOG;
 import org.bukkit.*;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.CommandSender;
@@ -32,59 +33,70 @@ public class ImageCommand {
 
     public static final int ITEMS_PER_PAGE = 9;
 
+    private static void sendMessage(@NotNull CommandSender sender, @NotNull String message) {
+
+        if (sender instanceof Player) {
+
+            UtilitiesOG.trueogMessage((Player) sender, message);
+
+        } else {
+
+            UtilitiesOG.logToConsole(YamipaPlugin.getPrefix(), message);
+
+        }
+
+    }
+
     public static void showHelp(@NotNull CommandSender s, @NotNull String commandName) {
 
         String cmd = "/" + commandName;
-        s.sendMessage(ChatColor.BOLD + "=== Yamipa-OG Plugin Help ===");
-        s.sendMessage(ChatColor.AQUA + cmd + ChatColor.RESET + " - Show this help");
+        sendMessage(s, "&l=== Yamipa-OG Plugin Help ===");
+        sendMessage(s, "&b" + cmd + "&r - Show this help");
         if (s.hasPermission("yamipa.command.clear") || s.hasPermission("yamipa.clear")) {
 
-            s.sendMessage(ChatColor.AQUA + cmd + " clear <x z w> <r> [<player>]" + ChatColor.RESET
-                    + " - Remove placed images");
+            sendMessage(s, "&b" + cmd + " clear <x z w> <r> [<player>]&r - Remove placed images");
 
         }
 
         if (s.hasPermission("yamipa.command.describe") || s.hasPermission("yamipa.describe")) {
 
-            s.sendMessage(ChatColor.AQUA + cmd + " describe" + ChatColor.RESET + " - Describe placed image");
+            sendMessage(s, "&b" + cmd + " describe&r - Describe placed image");
 
         }
 
         if (s.hasPermission("yamipa.command.download") || s.hasPermission("yamipa.download")) {
 
-            s.sendMessage(ChatColor.AQUA + cmd + " download <url> <filename>" + ChatColor.RESET + " - Download image");
+            sendMessage(s, "&b" + cmd + " download <url> <filename>&r - Download image");
 
         }
 
         if (s.hasPermission("yamipa.command.give") || s.hasPermission("yamipa.give")) {
 
-            s.sendMessage(ChatColor.AQUA + cmd + " give <p> <filename> <#> <w> [<h>] [<f>]" + ChatColor.RESET
-                    + " - Give items");
+            sendMessage(s, "&b" + cmd + " give <p> <filename> <#> <w> [<h>] [<f>]&r - Give items");
 
         }
 
         if (s.hasPermission("yamipa.command.list") || s.hasPermission("yamipa.list")) {
 
-            s.sendMessage(ChatColor.AQUA + cmd + " list [<page>]" + ChatColor.RESET + " - List all images");
+            sendMessage(s, "&b" + cmd + " list [<page>]&r - List all images");
 
         }
 
         if (s.hasPermission("yamipa.command.place") || s.hasPermission("yamipa.place")) {
 
-            s.sendMessage(
-                    ChatColor.AQUA + cmd + " place <filename> <w> [<h>] [<f>]" + ChatColor.RESET + " - Place image");
+            sendMessage(s, "&b" + cmd + " place <filename> <w> [<h>] [<f>]&r - Place image");
 
         }
 
         if (s.hasPermission("yamipa.command.remove.own") || s.hasPermission("yamipa.remove")) {
 
-            s.sendMessage(ChatColor.AQUA + cmd + " remove" + ChatColor.RESET + " - Remove a single placed image");
+            sendMessage(s, "&b" + cmd + " remove&r - Remove a single placed image");
 
         }
 
         if (s.hasPermission("yamipa.command.top") || s.hasPermission("yamipa.top")) {
 
-            s.sendMessage(ChatColor.AQUA + cmd + " top" + ChatColor.RESET + " - List players with the most images");
+            sendMessage(s, "&b" + cmd + " top&r - List players with the most images");
 
         }
 
@@ -98,7 +110,7 @@ public class ImageCommand {
         // Are there any images available?
         if (numOfImages == 0) {
 
-            sender.sendMessage(ChatColor.RED + "No images found in the images directory");
+            sendMessage(sender, "&cNo images found in the images directory");
             return;
 
         }
@@ -107,7 +119,7 @@ public class ImageCommand {
         int firstImageIndex = Math.max(page - 1, 0) * ITEMS_PER_PAGE;
         if (firstImageIndex >= numOfImages) {
 
-            sender.sendMessage(ChatColor.RED + "Page " + page + " not found");
+            sendMessage(sender, "&cPage " + page + " not found");
             return;
 
         }
@@ -117,13 +129,13 @@ public class ImageCommand {
         if (page > 0) {
 
             int maxPage = (int) Math.ceil((float) numOfImages / ITEMS_PER_PAGE);
-            sender.sendMessage("=== Page " + page + " out of " + maxPage + " ===");
+            sendMessage(sender, "=== Page " + page + " out of " + maxPage + " ===");
 
         }
 
         for (int i = firstImageIndex; i < stopImageIndex; ++i) {
 
-            sender.sendMessage("" + ChatColor.GOLD + filenames[i]);
+            sendMessage(sender, "&6" + filenames[i]);
 
         }
 
@@ -138,14 +150,14 @@ public class ImageCommand {
         Path destPath = basePath.resolve(filename);
         if (!destPath.getParent().equals(basePath)) {
 
-            sender.sendMessage(ChatColor.RED + "Not a valid destination filename");
+            sendMessage(sender, "&cNot a valid destination filename");
             return;
 
         }
 
         if (destPath.toFile().exists()) {
 
-            sender.sendMessage(ChatColor.RED + "There's already a file with that name");
+            sendMessage(sender, "&cThere's already a file with that name");
             return;
 
         }
@@ -187,7 +199,7 @@ public class ImageCommand {
 
         } catch (MalformedURLException e) {
 
-            sender.sendMessage(ChatColor.RED + "The remote URL is not valid");
+            sendMessage(sender, "&cThe remote URL is not valid");
             return;
 
         }
@@ -210,7 +222,7 @@ public class ImageCommand {
                 }
 
                 // Download file
-                sender.sendMessage("Downloading file...");
+                sendMessage(sender, "Downloading file...");
                 Files.copy(conn.getInputStream(), destPath);
 
                 // Validate downloaded file
@@ -221,11 +233,11 @@ public class ImageCommand {
                 }
 
                 // Notify sender
-                sender.sendMessage(ChatColor.GREEN + "Done!");
+                sendMessage(sender, "&aDone!");
 
             } catch (IOException e) {
 
-                sender.sendMessage(ChatColor.RED + "An error occurred trying to download the remote file");
+                sendMessage(sender, "&cAn error occurred trying to download the remote file");
                 plugin.warning("Failed to download file from \"" + finalUrl + "\": " + e.getClass().getName());
 
             } catch (IllegalArgumentException e) {
@@ -236,7 +248,7 @@ public class ImageCommand {
 
                 }
 
-                sender.sendMessage(ChatColor.RED + e.getMessage());
+                sendMessage(sender, "&c" + e.getMessage());
 
             }
 
@@ -250,7 +262,7 @@ public class ImageCommand {
         Dimension sizeInPixels = image.getSize();
         if (sizeInPixels == null) {
 
-            player.sendMessage(ChatColor.RED + "The requested file is not a valid image");
+            UtilitiesOG.trueogMessage(player, "&cThe requested file is not a valid image");
             return;
 
         }
@@ -264,7 +276,7 @@ public class ImageCommand {
             placeImage(player, image, width, finalHeight, flags, location, face);
 
         });
-        task.onFailure(() -> ActionBar.send(player, ChatColor.RED + "Image placing canceled"));
+        task.onFailure(() -> ActionBar.send(player, "&cImage placing canceled"));
         task.run("Right click a block to continue");
 
     }
@@ -285,14 +297,14 @@ public class ImageCommand {
 
             if (!Permissions.canBuild(player, loc)) {
 
-                ActionBar.send(player, ChatColor.RED + "You're not allowed to place an image here!");
+                ActionBar.send(player, "&cYou're not allowed to place an image here!");
                 return false;
 
             }
 
             if (renderer.getImage(loc, face) != null) {
 
-                ActionBar.send(player, ChatColor.RED + "There's already an image there!");
+                ActionBar.send(player, "&cThere's already an image there!");
                 return false;
 
             }
@@ -300,7 +312,7 @@ public class ImageCommand {
         }
 
         // Show loading status to player
-        ActionBar loadingActionBar = ActionBar.repeat(player, ChatColor.AQUA + "Loading image...");
+        ActionBar loadingActionBar = ActionBar.repeat(player, "&bLoading image...");
         fakeImage.setOnLoadedListener(loadingActionBar::clear);
 
         // Add fake image to renderer
@@ -317,7 +329,7 @@ public class ImageCommand {
             FakeImage image = YamipaPlugin.getInstance().getRenderer().getImage(location, face);
             if (image == null) {
 
-                ActionBar.send(player, ChatColor.RED + "That is not a valid image!");
+                ActionBar.send(player, "&cThat is not a valid image!");
                 return;
 
             }
@@ -327,7 +339,7 @@ public class ImageCommand {
                     && !player.hasPermission("yamipa.command.remove") && !player.hasPermission("yamipa.remove"))
             {
 
-                ActionBar.send(player, ChatColor.RED + "You cannot remove images from other players!");
+                ActionBar.send(player, "&cYou cannot remove images from other players!");
                 return;
 
             }
@@ -336,7 +348,7 @@ public class ImageCommand {
             removeImage(player, image);
 
         });
-        task.onFailure(() -> ActionBar.send(player, ChatColor.RED + "Image removing canceled"));
+        task.onFailure(() -> ActionBar.send(player, "&cImage removing canceled"));
         task.run("Right click an image to continue");
 
     }
@@ -348,7 +360,7 @@ public class ImageCommand {
 
             if (!Permissions.canDestroy(player, loc)) {
 
-                ActionBar.send(player, ChatColor.RED + "You're not allowed to remove this image!");
+                ActionBar.send(player, "&cYou're not allowed to remove this image!");
                 return false;
 
             }
@@ -408,7 +420,7 @@ public class ImageCommand {
 
         }
 
-        sender.sendMessage("Removed " + images.size() + " placed image(s)");
+        sendMessage(sender, "Removed " + images.size() + " placed image(s)");
 
     }
 
@@ -423,44 +435,44 @@ public class ImageCommand {
             FakeImage image = renderer.getImage(location, face);
             if (image == null) {
 
-                ActionBar.send(player, ChatColor.RED + "That is not a valid image!");
+                ActionBar.send(player, "&cThat is not a valid image!");
                 return;
 
             }
 
             // Separate previous messages
-            player.sendMessage("");
+            UtilitiesOG.trueogMessage(player, "");
 
             // Basic information
-            player.sendMessage(ChatColor.GOLD + "Filename: " + ChatColor.RESET + image.getFilename());
-            player.sendMessage(
-                    ChatColor.GOLD + "World: " + ChatColor.RESET + image.getLocation().getChunk().getWorld().getName());
-            player.sendMessage(ChatColor.GOLD + "Coordinates: " + ChatColor.RESET + image.getLocation().getBlockX()
+            UtilitiesOG.trueogMessage(player, "&6Filename: &r" + image.getFilename());
+            UtilitiesOG.trueogMessage(player,
+                    "&6World: &r" + image.getLocation().getChunk().getWorld().getName());
+            UtilitiesOG.trueogMessage(player, "&6Coordinates: &r" + image.getLocation().getBlockX()
                     + ", " + image.getLocation().getBlockY() + ", " + image.getLocation().getBlockZ());
-            player.sendMessage(ChatColor.GOLD + "Block Face: " + ChatColor.RESET + image.getBlockFace());
-            player.sendMessage(ChatColor.GOLD + "Rotation: " + ChatColor.RESET + image.getRotation());
-            player.sendMessage(ChatColor.GOLD + "Dimensions: " + ChatColor.RESET + image.getWidth() + "x"
-                    + image.getHeight() + " blocks");
+            UtilitiesOG.trueogMessage(player, "&6Block Face: &r" + image.getBlockFace());
+            UtilitiesOG.trueogMessage(player, "&6Rotation: &r" + image.getRotation());
+            UtilitiesOG.trueogMessage(player,
+                    "&6Dimensions: &r" + image.getWidth() + "x" + image.getHeight() + " blocks");
 
             // Speed
             int delay = image.getDelay() * 50;
-            String delayStr = (delay > 0) ? delay + " ms per step" : ChatColor.GRAY + "N/A";
-            player.sendMessage(ChatColor.GOLD + "Speed: " + ChatColor.RESET + delayStr);
+            String delayStr = (delay > 0) ? delay + " ms per step" : "&7N/A";
+            UtilitiesOG.trueogMessage(player, "&6Speed: &r" + delayStr);
 
             // Placed At
-            String dateStr = (image.getPlacedAt() == null) ? ChatColor.GRAY + "Some point in time"
+            String dateStr = (image.getPlacedAt() == null) ? "&7Some point in time"
                     : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z").format(image.getPlacedAt());
-            player.sendMessage(ChatColor.GOLD + "Placed At: " + ChatColor.RESET + dateStr);
+            UtilitiesOG.trueogMessage(player, "&6Placed At: &r" + dateStr);
 
             // Placed By
             String playerStr;
             if (image.getPlacedBy().getUniqueId().equals(FakeImage.UNKNOWN_PLAYER_ID)) {
 
-                playerStr = ChatColor.GRAY + "Someone";
+                playerStr = "&7Someone";
 
             } else if (image.getPlacedBy().getName() == null) {
 
-                playerStr = ChatColor.DARK_AQUA + image.getPlacedBy().getUniqueId().toString();
+                playerStr = "&3" + image.getPlacedBy().getUniqueId();
 
             } else {
 
@@ -468,44 +480,44 @@ public class ImageCommand {
 
             }
 
-            player.sendMessage(ChatColor.GOLD + "Placed By: " + ChatColor.RESET + playerStr);
+            UtilitiesOG.trueogMessage(player, "&6Placed By: &r" + playerStr);
 
             // Flags
             String flagsStr = "";
             if (image.hasFlag(FakeImage.FLAG_ANIMATABLE)) {
 
-                flagsStr += ChatColor.AQUA + "ANIM ";
+                flagsStr += "&bANIM ";
 
             }
 
             if (image.hasFlag(FakeImage.FLAG_REMOVABLE)) {
 
-                flagsStr += ChatColor.RED + "REMO ";
+                flagsStr += "&cREMO ";
 
             }
 
             if (image.hasFlag(FakeImage.FLAG_DROPPABLE)) {
 
-                flagsStr += ChatColor.LIGHT_PURPLE + "DROP ";
+                flagsStr += "&dDROP ";
 
             }
 
             if (image.hasFlag(FakeImage.FLAG_GLOWING)) {
 
-                flagsStr += ChatColor.GREEN + "GLOW ";
+                flagsStr += "&aGLOW ";
 
             }
 
             if (flagsStr.isEmpty()) {
 
-                flagsStr = ChatColor.GRAY + "N/A";
+                flagsStr = "&7N/A";
 
             }
 
-            player.sendMessage(ChatColor.GOLD + "Flags: " + ChatColor.RESET + flagsStr);
+            UtilitiesOG.trueogMessage(player, "&6Flags: &r" + flagsStr);
 
         });
-        task.onFailure(() -> ActionBar.send(player, ChatColor.RED + "Image describing canceled"));
+        task.onFailure(() -> ActionBar.send(player, "&cImage describing canceled"));
         task.run("Right click the image to describe");
 
     }
@@ -516,10 +528,10 @@ public class ImageCommand {
         Map<OfflinePlayer, Integer> stats = YamipaPlugin.getInstance().getRenderer().getImagesCountByPlayer();
 
         // Render header
-        sender.sendMessage("=== Top players with the most placed images ===");
+        sendMessage(sender, "=== Top players with the most placed images ===");
         if (stats.isEmpty()) {
 
-            sender.sendMessage(ChatColor.RED + "No one on this server has placed a single image!");
+            sendMessage(sender, "&cNo one on this server has placed a single image!");
             return;
 
         }
@@ -549,12 +561,10 @@ public class ImageCommand {
             }
 
             // Prepare player name or UUID
-            String playerName = (player.getName() == null) ? ChatColor.GOLD + player.getUniqueId().toString()
-                    : ChatColor.GREEN + player.getName();
+            String playerName = (player.getName() == null) ? "&6" + player.getUniqueId() : "&a" + player.getName();
 
             // Render player line
-            sender.sendMessage("" + ChatColor.BOLD + (rank > 1000 ? "1000+" : rank) + ChatColor.RESET + ". "
-                    + playerName + ChatColor.RESET + ChatColor.GRAY + " - " + value + " "
+            sendMessage(sender, "&l" + (rank > 1000 ? "1000+" : rank) + "&r. " + playerName + "&r&7 - " + value + " "
                     + (value == 1 ? "image" : "images"));
             ++printedLines;
 
@@ -570,7 +580,7 @@ public class ImageCommand {
         Dimension sizeInPixels = image.getSize();
         if (sizeInPixels == null) {
 
-            sender.sendMessage(ChatColor.RED + "The requested file is not a valid image");
+            sendMessage(sender, "&cThe requested file is not a valid image");
             return;
 
         }
@@ -586,8 +596,8 @@ public class ImageCommand {
 
         // Add item stack to player's inventory
         player.getInventory().addItem(itemStack);
-        sender.sendMessage(ChatColor.ITALIC + "Added " + amount + " " + (amount == 1 ? "image item" : "image items")
-                + " to " + player.getName() + "'s inventory");
+        sendMessage(sender, "&oAdded " + amount + " " + (amount == 1 ? "image item" : "image items") + " to "
+                + player.getName() + "'s inventory");
 
     }
 
