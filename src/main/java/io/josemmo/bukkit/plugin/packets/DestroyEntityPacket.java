@@ -1,12 +1,17 @@
 package io.josemmo.bukkit.plugin.packets;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.events.PacketContainer;
-import io.josemmo.bukkit.plugin.utils.Internals;
-import org.jetbrains.annotations.NotNull;
 import java.util.Collections;
 
+import org.jetbrains.annotations.NotNull;
+
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.events.PacketContainer;
+
+import io.josemmo.bukkit.plugin.utils.Internals;
+
 public class DestroyEntityPacket extends PacketContainer {
+
+    private static final long serialVersionUID = 1L;
 
     public DestroyEntityPacket() {
 

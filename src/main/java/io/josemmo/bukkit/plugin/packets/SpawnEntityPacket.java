@@ -1,14 +1,18 @@
 package io.josemmo.bukkit.plugin.packets;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.events.PacketContainer;
-import io.josemmo.bukkit.plugin.utils.Internals;
+import java.util.UUID;
+
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
-import java.util.UUID;
+
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.events.PacketContainer;
+
+import io.josemmo.bukkit.plugin.utils.Internals;
 
 public class SpawnEntityPacket extends PacketContainer {
 
+    private static final long serialVersionUID = 1L;
     private static final boolean ROTATION_AS_BYTES;
     private static final int DATA_INDEX;
 

@@ -1,16 +1,18 @@
 package io.josemmo.bukkit.plugin.renderer;
 
-import io.josemmo.bukkit.plugin.packets.MapDataPacket;
-import org.bukkit.entity.Player;
-import org.bukkit.map.MapPalette;
-import org.jetbrains.annotations.NotNull;
-import java.awt.*;
+import java.awt.Color;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.bukkit.entity.Player;
+import org.bukkit.map.MapPalette;
+import org.jetbrains.annotations.NotNull;
+
+import io.josemmo.bukkit.plugin.packets.MapDataPacket;
 
 public class FakeMap extends FakeEntity {
 
@@ -67,7 +69,7 @@ public class FakeMap extends FakeEntity {
 
         if (errorInstance == null) {
 
-            byte[] pixels = new byte[DIMENSION * DIMENSION];
+            final byte[] pixels = new byte[DIMENSION * DIMENSION];
             Arrays.fill(pixels, pixelToIndex(Color.RED.getRGB()));
             errorInstance = new FakeMap(pixels);
 
@@ -86,8 +88,8 @@ public class FakeMap extends FakeEntity {
      */
     public static @NotNull FakeMapsContainer getErrorMatrix(int width, int height) {
 
-        FakeMap[] errorMaps = new FakeMap[] { getErrorInstance() };
-        FakeMap[][][] matrix = new FakeMap[width][height][1];
+        final FakeMap[] errorMaps = new FakeMap[] { getErrorInstance() };
+        final FakeMap[][][] matrix = new FakeMap[width][height][1];
         for (FakeMap[][] column : matrix) {
 
             Arrays.fill(column, errorMaps);
@@ -165,12 +167,12 @@ public class FakeMap extends FakeEntity {
      */
     public boolean requestResend(@NotNull Player player) {
 
-        UUID uuid = player.getUniqueId();
-        long now = Instant.now().getEpochSecond();
+        final UUID uuid = player.getUniqueId();
+        final long now = Instant.now().getEpochSecond();
 
         // Has enough time passed since last re-send?
-        long last = lastPlayerSendTime.getOrDefault(uuid, 0L);
-        if ((now - last) <= RESEND_THRESHOLD && (player.getLastPlayed() / 1000) < last) {
+        final long last = lastPlayerSendTime.getOrDefault(uuid, 0L);
+        if ((now - last) <= RESEND_THRESHOLD && (player.getLastSeen() / 1000) < last) {
 
             return false;
 
@@ -190,7 +192,7 @@ public class FakeMap extends FakeEntity {
      */
     public @NotNull MapDataPacket getPixelsPacket() {
 
-        MapDataPacket mapDataPacket = new MapDataPacket();
+        final MapDataPacket mapDataPacket = new MapDataPacket();
         mapDataPacket.setId(id).setScale(0) // Fully zoomed-in
                 .setLocked(true).setArea(DIMENSION, DIMENSION, 0, 0).setPixels(pixels);
         return mapDataPacket;

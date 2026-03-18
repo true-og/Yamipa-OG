@@ -1,5 +1,16 @@
 package io.josemmo.bukkit.plugin.utils;
 
+import java.util.Objects;
+import java.util.concurrent.Callable;
+import java.util.logging.Level;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.TownyPermission;
 import com.palmergames.bukkit.towny.utils.PlayerCacheUtil;
@@ -10,21 +21,13 @@ import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.internal.platform.WorldGuardPlatform;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
+
 import io.josemmo.bukkit.plugin.YamipaPlugin;
 import me.angeschossen.lands.api.LandsIntegration;
 import me.angeschossen.lands.api.flags.type.RoleFlag;
 import me.angeschossen.lands.api.land.LandWorld;
 import me.angeschossen.lands.api.player.LandPlayer;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import java.util.Objects;
-import java.util.concurrent.Callable;
-import java.util.logging.Level;
 
 public class Permissions {
 
@@ -98,7 +101,6 @@ public class Permissions {
      * @param location Block location
      * @return Whether player can destroy or not
      */
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean canDestroy(@NotNull Player player, @NotNull Location location) {
 
         return queryWorldGuard(player, location, false) && queryGriefPrevention(player, location, false)
@@ -114,11 +116,11 @@ public class Permissions {
 
         }
 
-        WorldGuardPlatform platform = worldGuard.getPlatform();
-        LocalPlayer wrappedPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
+        final WorldGuardPlatform platform = worldGuard.getPlatform();
+        final LocalPlayer wrappedPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
 
         // Grant if bypass permission is enabled
-        boolean hasBypass = platform.getSessionManager().hasBypass(wrappedPlayer,
+        final boolean hasBypass = platform.getSessionManager().hasBypass(wrappedPlayer,
                 BukkitAdapter.adapt(Objects.requireNonNull(location.getWorld())));
         if (hasBypass) {
 
@@ -127,7 +129,7 @@ public class Permissions {
         }
 
         // Check permission (note "BUILD" flag must always be present)
-        StateFlag flag = isBuild ? Flags.BLOCK_PLACE : Flags.BLOCK_BREAK;
+        final StateFlag flag = isBuild ? Flags.BLOCK_PLACE : Flags.BLOCK_BREAK;
         return platform.getRegionContainer().createQuery().testState(BukkitAdapter.adapt(location), wrappedPlayer,
                 Flags.BUILD, flag);
 
@@ -141,10 +143,10 @@ public class Permissions {
 
         }
 
-        YamipaPlugin plugin = YamipaPlugin.getInstance();
+        final YamipaPlugin plugin = YamipaPlugin.getInstance();
 
         // Build callable depending on permission to check
-        Callable<Boolean> canEditCallable = isBuild ? () -> griefPrevention.allowBuild(player, location) == null
+        final Callable<Boolean> canEditCallable = isBuild ? () -> griefPrevention.allowBuild(player, location) == null
                 : () -> griefPrevention.allowBreak(player, location.getBlock(), location) == null;
 
         // Check permission from primary thread
@@ -170,8 +172,8 @@ public class Permissions {
 
         }
 
-        Material material = location.getBlock().getType();
-        TownyPermission.ActionType type = isBuild ? TownyPermission.ActionType.BUILD
+        final Material material = location.getBlock().getType();
+        final TownyPermission.ActionType type = isBuild ? TownyPermission.ActionType.BUILD
                 : TownyPermission.ActionType.DESTROY;
         return PlayerCacheUtil.getCachePermission(player, location, material, type);
 
@@ -185,15 +187,15 @@ public class Permissions {
 
         }
 
-        LandWorld landWorld = landsApi.getWorld(Objects.requireNonNull(location.getWorld()));
+        final LandWorld landWorld = landsApi.getWorld(Objects.requireNonNull(location.getWorld()));
         if (landWorld == null) {
 
             return true;
 
         }
 
-        LandPlayer landPlayer = Objects.requireNonNull(landsApi.getLandPlayer(player.getUniqueId()));
-        RoleFlag flag = isBuild ? me.angeschossen.lands.api.flags.type.Flags.BLOCK_PLACE
+        final LandPlayer landPlayer = Objects.requireNonNull(landsApi.getLandPlayer(player.getUniqueId()));
+        final RoleFlag flag = isBuild ? me.angeschossen.lands.api.flags.type.Flags.BLOCK_PLACE
                 : me.angeschossen.lands.api.flags.type.Flags.BLOCK_BREAK;
         return landWorld.hasRoleFlag(landPlayer, location, flag, null, false);
 

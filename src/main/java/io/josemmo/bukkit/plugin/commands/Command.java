@@ -21,224 +21,224 @@ import net.trueog.utilitiesog.UtilitiesOG;
 
 public class Command {
 
-	private final String name;
-	private final List<Argument> arguments = new ArrayList<>();
-	private Predicate<CommandSender> requirementHandler = __ -> true;
-	private BiConsumer<CommandSender, Object[]> executesHandler = null;
-	private BiConsumer<Player, Object[]> executesPlayerHandler = null;
-	private final List<Command> subcommands = new ArrayList<>();
+    private final String name;
+    private final List<Argument> arguments = new ArrayList<>();
+    private Predicate<CommandSender> requirementHandler = __ -> true;
+    private BiConsumer<CommandSender, Object[]> executesHandler = null;
+    private BiConsumer<Player, Object[]> executesPlayerHandler = null;
+    private final List<Command> subcommands = new ArrayList<>();
 
-	/**
-	 * Command constructor
-	 * 
-	 * @param name Command literal name
-	 */
-	public Command(@NotNull String name) {
+    /**
+     * Command constructor
+     * 
+     * @param name Command literal name
+     */
+    public Command(@NotNull String name) {
 
-		this.name = name;
+        this.name = name;
 
-	}
-
-	/**
-	 * Add argument to command
-	 * 
-	 * @param argument Argument instance
-	 * @return This instance
-	 */
-	public @NotNull Command withArgument(@NotNull Argument argument) {
+    }
+
+    /**
+     * Add argument to command
+     * 
+     * @param argument Argument instance
+     * @return This instance
+     */
+    public @NotNull Command withArgument(@NotNull Argument argument) {
 
-		arguments.add(argument);
-		return this;
+        arguments.add(argument);
+        return this;
 
-	}
+    }
 
-	/**
-	 * Add requirement handler to this command
-	 * 
-	 * @param handler Handler to determine command availability
-	 * @return This instance
-	 */
-	public @NotNull Command withRequirement(@NotNull Predicate<CommandSender> handler) {
+    /**
+     * Add requirement handler to this command
+     * 
+     * @param handler Handler to determine command availability
+     * @return This instance
+     */
+    public @NotNull Command withRequirement(@NotNull Predicate<CommandSender> handler) {
 
-		requirementHandler = handler;
-		return this;
+        requirementHandler = handler;
+        return this;
 
-	}
+    }
 
-	/**
-	 * Add permission requirement to this command
-	 * 
-	 * @param permissions Permission names (match as least one)
-	 * @return This instance
-	 */
-	public @NotNull Command withPermission(@NotNull String... permissions) {
+    /**
+     * Add permission requirement to this command
+     * 
+     * @param permissions Permission names (match as least one)
+     * @return This instance
+     */
+    public @NotNull Command withPermission(@NotNull String... permissions) {
 
-		return withRequirement(sender -> {
+        return withRequirement(sender -> {
 
-			for (String permission : permissions) {
+            for (String permission : permissions) {
 
-				if (sender.hasPermission(permission)) {
+                if (sender.hasPermission(permission)) {
 
-					return true;
+                    return true;
 
-				}
+                }
 
-			}
+            }
 
-			return false;
+            return false;
 
-		});
+        });
 
-	}
+    }
 
-	/**
-	 * Add handler that will be executed when the command gets called
-	 * 
-	 * @param handler Command handler
-	 * @return This instance
-	 */
-	public @NotNull Command executes(@NotNull BiConsumer<CommandSender, Object[]> handler) {
+    /**
+     * Add handler that will be executed when the command gets called
+     * 
+     * @param handler Command handler
+     * @return This instance
+     */
+    public @NotNull Command executes(@NotNull BiConsumer<CommandSender, Object[]> handler) {
 
-		executesHandler = handler;
-		return this;
+        executesHandler = handler;
+        return this;
 
-	}
+    }
 
-	/**
-	 * Add handler that will be executed when the command gets called by a player
-	 * 
-	 * @param handler Command handler
-	 * @return This instance
-	 */
-	public @NotNull Command executesPlayer(@NotNull BiConsumer<Player, Object[]> handler) {
+    /**
+     * Add handler that will be executed when the command gets called by a player
+     * 
+     * @param handler Command handler
+     * @return This instance
+     */
+    public @NotNull Command executesPlayer(@NotNull BiConsumer<Player, Object[]> handler) {
 
-		executesPlayerHandler = handler;
-		return this;
+        executesPlayerHandler = handler;
+        return this;
 
-	}
+    }
 
-	/**
-	 * Add subcommand to this command
-	 * 
-	 * @param name Subcommand literal name
-	 * @return The new subcommand
-	 */
-	public @NotNull Command addSubcommand(@NotNull String name) {
+    /**
+     * Add subcommand to this command
+     * 
+     * @param name Subcommand literal name
+     * @return The new subcommand
+     */
+    public @NotNull Command addSubcommand(@NotNull String name) {
 
-		final Command subcommand = new Command(name);
-		subcommands.add(subcommand);
-		return subcommand;
+        final Command subcommand = new Command(name);
+        subcommands.add(subcommand);
+        return subcommand;
 
-	}
+    }
 
-	/**
-	 * Build command and all of its children
-	 * 
-	 * @return Literal argument builder instance
-	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public @NotNull LiteralArgumentBuilder<?> build() {
+    /**
+     * Build command and all of its children
+     * 
+     * @return Literal argument builder instance
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public @NotNull LiteralArgumentBuilder<?> build() {
 
-		final LiteralArgumentBuilder<?> root = LiteralArgumentBuilder.literal(name);
+        final LiteralArgumentBuilder<?> root = LiteralArgumentBuilder.literal(name);
 
-		// Add arguments and execution handler
-		buildElement(root, 0);
+        // Add arguments and execution handler
+        buildElement(root, 0);
 
-		// Add subcommands
-		subcommands.forEach(subcommand -> root.then((ArgumentBuilder) subcommand.build()));
+        // Add subcommands
+        subcommands.forEach(subcommand -> root.then((ArgumentBuilder) subcommand.build()));
 
-		return root;
+        return root;
 
-	}
+    }
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private @NotNull ArgumentBuilder buildElement(@NotNull ArgumentBuilder parent, int argIndex) {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private @NotNull ArgumentBuilder buildElement(@NotNull ArgumentBuilder parent, int argIndex) {
 
-		// Attach requirement handler to each command element
-		parent.requires(source -> {
+        // Attach requirement handler to each command element
+        parent.requires(source -> {
 
-			final CommandSender sender = Internals.getBukkitSender(source);
-			return requirementHandler.test(sender);
+            final CommandSender sender = Internals.getBukkitSender(source);
+            return requirementHandler.test(sender);
 
-		});
+        });
 
-		// Chain command elements from the bottom-up
-		if (argIndex < arguments.size()) {
+        // Chain command elements from the bottom-up
+        if (argIndex < arguments.size()) {
 
-			parent.then(buildElement(arguments.get(argIndex).build(), argIndex + 1)).executes(ctx -> {
+            parent.then(buildElement(arguments.get(argIndex).build(), argIndex + 1)).executes(ctx -> {
 
-				final CommandSender sender = Internals.getBukkitSender(ctx.getSource());
-				final String argsErrorMessage = "&cERROR: Missing required arguments!";
-				if(sender instanceof Player) {
+                final CommandSender sender = Internals.getBukkitSender(ctx.getSource());
+                final String argsErrorMessage = "&cERROR: Missing required arguments!";
+                if (sender instanceof Player) {
 
-					UtilitiesOG.trueogMessage((Player) sender, argsErrorMessage);
+                    UtilitiesOG.trueogMessage((Player) sender, argsErrorMessage);
 
-				}
-				else {
+                } else {
 
-					UtilitiesOG.logToConsole(YamipaPlugin.getPrefix(), argsErrorMessage);
+                    UtilitiesOG.logToConsole(YamipaPlugin.getPrefix(), argsErrorMessage);
 
-				}
+                }
 
-				return 1;
+                return 1;
 
-			});
-			return parent;
+            });
+            return parent;
 
-		}
+        }
 
-		// Attach execution handler to last command element
-		if (executesPlayerHandler != null) {
+        // Attach execution handler to last command element
+        if (executesPlayerHandler != null) {
 
-			parent.executes(ctx -> {
+            parent.executes(ctx -> {
 
-				final CommandSender sender = Internals.getBukkitSender(ctx.getSource());
-				if (sender instanceof Player) {
+                final CommandSender sender = Internals.getBukkitSender(ctx.getSource());
+                if (sender instanceof Player) {
 
-					executesPlayerHandler.accept((Player) sender, getArgumentValues(sender, ctx));
+                    executesPlayerHandler.accept((Player) sender, getArgumentValues(sender, ctx));
 
-				} else {
+                } else {
 
-					UtilitiesOG.logToConsole(YamipaPlugin.getPrefix(), "Only in-game players can execute this command!");
+                    UtilitiesOG.logToConsole(YamipaPlugin.getPrefix(),
+                            "Only in-game players can execute this command!");
 
-				}
+                }
 
-				return 0;
+                return 0;
 
-			});
+            });
 
-		} else if (executesHandler != null) {
+        } else if (executesHandler != null) {
 
-			parent.executes(ctx -> {
+            parent.executes(ctx -> {
 
-				final CommandSender sender = Internals.getBukkitSender(ctx.getSource());
-				executesHandler.accept(sender, getArgumentValues(sender, ctx));
-				return 0;
+                final CommandSender sender = Internals.getBukkitSender(ctx.getSource());
+                executesHandler.accept(sender, getArgumentValues(sender, ctx));
+                return 0;
 
-			});
+            });
 
-		}
+        }
 
-		return parent;
+        return parent;
 
-	}
+    }
 
-	private @NotNull Object[] getArgumentValues(@NotNull CommandSender sender, @NotNull CommandContext<?> ctx)
-			throws CommandSyntaxException
-	{
+    private @NotNull Object[] getArgumentValues(@NotNull CommandSender sender, @NotNull CommandContext<?> ctx)
+            throws CommandSyntaxException
+    {
 
-		final List<Object> argValues = new ArrayList<>();
-		argValues.add(ctx.getNodes().get(0).getNode().getName());
-		for (Argument argument : arguments) {
+        final List<Object> argValues = new ArrayList<>();
+        argValues.add(ctx.getNodes().get(0).getNode().getName());
+        for (Argument argument : arguments) {
 
-			Object value = ctx.getArgument(argument.getName(), Object.class);
-			value = argument.parse(sender, value);
-			argValues.add(value);
+            Object value = ctx.getArgument(argument.getName(), Object.class);
+            value = argument.parse(sender, value);
+            argValues.add(value);
 
-		}
+        }
 
-		return argValues.toArray(new Object[0]);
+        return argValues.toArray(new Object[0]);
 
-	}
+    }
 
 }

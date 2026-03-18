@@ -23,227 +23,230 @@ import net.trueog.utilitiesog.UtilitiesOG;
 
 public class YamipaPlugin extends JavaPlugin {
 
-	private static YamipaPlugin instance;
-	private boolean verbose;
-	private ImageStorage storage;
-	private ImageRenderer renderer;
-	private ItemService itemService;
-	private ScheduledExecutorService scheduler;
+    private static YamipaPlugin instance;
+    private boolean verbose;
+    private ImageStorage storage;
+    private ImageRenderer renderer;
+    private ItemService itemService;
+    private ScheduledExecutorService scheduler;
 
-	/**
-	 * Get plugin instance
-	 * 
-	 * @return Plugin instance
-	 */
-	public static @NotNull YamipaPlugin getInstance() {
+    /**
+     * Get plugin instance
+     * 
+     * @return Plugin instance
+     */
+    public static @NotNull YamipaPlugin getInstance() {
 
-		return instance;
+        return instance;
 
-	}
+    }
 
-	public static String getPrefix() {
+    public static String getPrefix() {
 
-		return "&7[&eYamipa&f-&4OG&7] ";
+        return "&7[&eYamipa&f-&4OG&7] ";
 
-	}
+    }
 
-	/**
-	 * Get image storage instance
-	 * 
-	 * @return Image storage instance
-	 */
-	public @NotNull ImageStorage getStorage() {
+    /**
+     * Get image storage instance
+     * 
+     * @return Image storage instance
+     */
+    public @NotNull ImageStorage getStorage() {
 
-		return storage;
+        return storage;
 
-	}
+    }
 
-	/**
-	 * Get image renderer instance
-	 * 
-	 * @return Image renderer instance
-	 */
-	public @NotNull ImageRenderer getRenderer() {
+    /**
+     * Get image renderer instance
+     * 
+     * @return Image renderer instance
+     */
+    public @NotNull ImageRenderer getRenderer() {
 
-		return renderer;
+        return renderer;
 
-	}
+    }
 
-	/**
-	 * Get internal tasks scheduler
-	 * 
-	 * @return Tasks scheduler
-	 */
-	public @NotNull ScheduledExecutorService getScheduler() {
+    /**
+     * Get internal tasks scheduler
+     * 
+     * @return Tasks scheduler
+     */
+    public @NotNull ScheduledExecutorService getScheduler() {
 
-		return scheduler;
+        return scheduler;
 
-	}
+    }
 
-	@Override
-	public void onLoad() {
+    @Override
+    public void onLoad() {
 
-		instance = this;
+        instance = this;
 
-	}
+    }
 
-	@Override
-	public void onEnable() {
+    @Override
+    public void onEnable() {
 
-		// Initialize logger
-		verbose = getConfig().getBoolean("verbose", false);
-		if (verbose) {
+        // Initialize logger
+        verbose = getConfig().getBoolean("verbose", false);
+        if (verbose) {
 
-			info("Running on VERBOSE mode");
+            info("Running on VERBOSE mode");
 
-		}
+        }
 
-		// Register plugin commands
-		ImageCommandBridge.register(this);
+        // Register plugin commands
+        ImageCommandBridge.register(this);
 
-		// Read plugin configuration paths
-		final Path basePath = getDataFolder().toPath();
-		final String imagesPath = getConfig().getString("images-path", "images");
-		final String cachePath = getConfig().getString("cache-path", "cache");
-		final String dataPath = getConfig().getString("data-path", "images.dat");
+        // Read plugin configuration paths
+        final Path basePath = getDataFolder().toPath();
+        final String imagesPath = getConfig().getString("images-path", "images");
+        final String cachePath = getConfig().getString("cache-path", "cache");
+        final String dataPath = getConfig().getString("data-path", "images.dat");
 
-		// Create image storage
-		storage = new ImageStorage(basePath.resolve(imagesPath).toString(), basePath.resolve(cachePath).toString());
-		try {
+        // Create image storage
+        storage = new ImageStorage(basePath.resolve(imagesPath).toString(), basePath.resolve(cachePath).toString());
+        try {
 
-			storage.start();
+            storage.start();
 
-		} catch (Exception e) {
+        } catch (Exception e) {
 
-			log(Level.SEVERE, "Failed to initialize image storage", e);
+            log(Level.SEVERE, "Failed to initialize image storage", e);
 
-		}
+        }
 
-		// Create image renderer
-		final boolean animateImages = getConfig().getBoolean("animate-images", true);
-		FakeImage.configure(animateImages);
-		info(animateImages ? "Enabled image animation support" : "Image animation support is disabled");
-		renderer = new ImageRenderer(basePath.resolve(dataPath).toString());
-		renderer.start();
+        // Create image renderer
+        final boolean animateImages = getConfig().getBoolean("animate-images", true);
+        FakeImage.configure(animateImages);
+        info(animateImages ? "Enabled image animation support" : "Image animation support is disabled");
+        renderer = new ImageRenderer(basePath.resolve(dataPath).toString());
+        renderer.start();
 
-		// Create image item service
-		itemService = new ItemService();
-		itemService.start();
+        // Create image item service
+        itemService = new ItemService();
+        itemService.start();
 
-		// Create thread pool
-		scheduler = Executors.newScheduledThreadPool(6);
+        // Create thread pool
+        scheduler = Executors.newScheduledThreadPool(6);
 
-		// Warm-up plugin dependencies
-		fine("Waiting for ProtocolLib to be ready...");
-		scheduler.execute(() -> {
+        // Warm-up plugin dependencies
+        fine("Waiting for ProtocolLib to be ready...");
+        scheduler.execute(() -> {
 
-			FakeEntity.waitForProtocolLib();
-			fine("ProtocolLib is now ready");
+            FakeEntity.waitForProtocolLib();
+            fine("ProtocolLib is now ready");
 
-		});
-		fine("Triggered map color cache warm-up");
-		FakeMap.pixelToIndex(Color.RED.getRGB()); // Ask for a color index to force cache generation
+        });
+        fine("Triggered map color cache warm-up");
+        FakeMap.pixelToIndex(Color.RED.getRGB()); // Ask for a color index to force cache generation
 
-	}
+    }
 
-	@Override
-	public void onDisable() {
+    @Override
+    public void onDisable() {
 
-		// Stop plugin components
-		storage.stop();
-		renderer.stop();
-		itemService.stop();
-		storage = null;
-		renderer = null;
-		itemService = null;
+        // Stop plugin components
+        storage.stop();
+        renderer.stop();
+        itemService.stop();
+        storage = null;
+        renderer = null;
+        itemService = null;
 
-		// Stop internal scheduler
-		scheduler.shutdownNow();
-		scheduler = null;
+        // Stop internal scheduler
+        scheduler.shutdownNow();
+        scheduler = null;
 
-		// Remove Bukkit listeners and tasks
-		HandlerList.unregisterAll(this);
-		Bukkit.getScheduler().cancelTasks(this);
+        // Remove Bukkit listeners and tasks
+        HandlerList.unregisterAll(this);
+        Bukkit.getScheduler().cancelTasks(this);
 
-	}
+    }
 
-	/**
-	 * Log message
-	 * 
-	 * @param level   Record level
-	 * @param message Message
-	 * @param e       Throwable instance, NULL to ignore
-	 */
-	public void log(@NotNull Level level, @NotNull String message, @Nullable Throwable e) {
+    /**
+     * Log message
+     * 
+     * @param level   Record level
+     * @param message Message
+     * @param e       Throwable instance, NULL to ignore
+     */
+    public void log(@NotNull Level level, @NotNull String message, @Nullable Throwable e) {
 
-		// Fix log level
-		if (level.intValue() < Level.INFO.intValue()) {
+        // Fix log level
+        if (level.intValue() < Level.INFO.intValue()) {
 
-			if (!verbose) {
-				return;
-			}
-			level = Level.INFO;
+            if (!verbose) {
 
-		}
+                return;
 
-		// Proxy record to real logger
-		if (e == null) {
+            }
 
-			UtilitiesOG.logToConsole(getPrefix(), message);
+            level = Level.INFO;
 
-		} else {
+        }
 
-			UtilitiesOG.logToConsole(getPrefix(), message);
+        // Proxy record to real logger
+        if (e == null) {
 
-			e.printStackTrace();
+            UtilitiesOG.logToConsole(getPrefix(), message);
 
-		}
+        } else {
 
-	}
+            UtilitiesOG.logToConsole(getPrefix(), message);
 
-	/**
-	 * Log message
-	 * 
-	 * @param level   Record level
-	 * @param message Message
-	 */
-	public void log(@NotNull Level level, @NotNull String message) {
+            e.printStackTrace();
 
-		log(level, message, null);
+        }
 
-	}
+    }
 
-	/**
-	 * Log warning message
-	 * 
-	 * @param message Message
-	 */
-	public void warning(@NotNull String message) {
+    /**
+     * Log message
+     * 
+     * @param level   Record level
+     * @param message Message
+     */
+    public void log(@NotNull Level level, @NotNull String message) {
 
-		log(Level.WARNING, message);
+        log(level, message, null);
 
-	}
+    }
 
-	/**
-	 * Log info message
-	 * 
-	 * @param message Message
-	 */
-	public void info(@NotNull String message) {
+    /**
+     * Log warning message
+     * 
+     * @param message Message
+     */
+    public void warning(@NotNull String message) {
 
-		log(Level.INFO, message);
+        log(Level.WARNING, message);
 
-	}
+    }
 
-	/**
-	 * Log fine message
-	 * 
-	 * @param message Message
-	 */
-	public void fine(@NotNull String message) {
+    /**
+     * Log info message
+     * 
+     * @param message Message
+     */
+    public void info(@NotNull String message) {
 
-		log(Level.FINE, message);
+        log(Level.INFO, message);
 
-	}
+    }
+
+    /**
+     * Log fine message
+     * 
+     * @param message Message
+     */
+    public void fine(@NotNull String message) {
+
+        log(Level.FINE, message);
+
+    }
 
 }

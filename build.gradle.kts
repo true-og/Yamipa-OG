@@ -104,12 +104,12 @@ tasks.shadowJar {
     exclude("META-INF/**")
     exclude("LICENSE")
     archiveClassifier.set("") // Use empty string instead of null.
-    archiveFileName.set("Yamipa-${project.version}.jar")
+    archiveFileName.set("Yamipa-OG-${project.version}.jar")
 }
 
 tasks.jar {
     archiveClassifier.set("part") // Applies to root jarfile only.
-    archiveFileName.set("Yamipa-${project.version}-part.jar")
+    archiveFileName.set("Yamipa-OG-${project.version}-part.jar")
 }
 
 tasks.build { dependsOn(tasks.spotlessApply, tasks.shadowJar) } // Build depends on spotless and shadow.

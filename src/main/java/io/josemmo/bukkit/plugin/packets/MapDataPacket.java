@@ -1,14 +1,17 @@
 package io.josemmo.bukkit.plugin.packets;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.reflect.StructureModifier;
-import io.josemmo.bukkit.plugin.utils.Internals;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.reflect.StructureModifier;
+
+import io.josemmo.bukkit.plugin.utils.Internals;
+
 public class MapDataPacket extends PacketContainer {
 
+    private static final long serialVersionUID = 1L;
     private static final int LOCKED_INDEX;
     private @Nullable StructureModifier<?> mapDataModifier;
 
@@ -31,8 +34,8 @@ public class MapDataPacket extends PacketContainer {
         } else {
 
             // Create modifier for map data instance
-            Class<?> mapDataType = getModifier().getField(4).getType();
-            Object mapDataInstance = getModifier().read(4);
+            final Class<?> mapDataType = getModifier().getField(4).getType();
+            final Object mapDataInstance = getModifier().read(4);
             mapDataModifier = new StructureModifier<>(mapDataType).withTarget(mapDataInstance);
 
         }

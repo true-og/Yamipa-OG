@@ -1,23 +1,5 @@
 package io.josemmo.bukkit.plugin.commands;
 
-import io.josemmo.bukkit.plugin.YamipaPlugin;
-import io.josemmo.bukkit.plugin.renderer.FakeImage;
-import io.josemmo.bukkit.plugin.renderer.ImageRenderer;
-import io.josemmo.bukkit.plugin.renderer.ItemService;
-import io.josemmo.bukkit.plugin.storage.ImageFile;
-import io.josemmo.bukkit.plugin.utils.Permissions;
-import io.josemmo.bukkit.plugin.utils.SelectBlockTask;
-import io.josemmo.bukkit.plugin.utils.ActionBar;
-import net.trueog.utilitiesog.UtilitiesOG;
-import org.bukkit.*;
-import org.bukkit.block.BlockFace;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.PluginDescriptionFile;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import javax.imageio.ImageIO;
 import java.awt.Dimension;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -27,7 +9,34 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.imageio.ImageIO;
+
+import org.apache.commons.lang3.StringUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.Rotation;
+import org.bukkit.block.BlockFace;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import io.josemmo.bukkit.plugin.YamipaPlugin;
+import io.josemmo.bukkit.plugin.renderer.FakeImage;
+import io.josemmo.bukkit.plugin.renderer.ImageRenderer;
+import io.josemmo.bukkit.plugin.renderer.ItemService;
+import io.josemmo.bukkit.plugin.storage.ImageFile;
+import io.josemmo.bukkit.plugin.utils.ActionBar;
+import io.josemmo.bukkit.plugin.utils.Permissions;
+import io.josemmo.bukkit.plugin.utils.SelectBlockTask;
+import net.trueog.utilitiesog.UtilitiesOG;
 
 public class ImageCommand {
 
@@ -49,7 +58,7 @@ public class ImageCommand {
 
     public static void showHelp(@NotNull CommandSender s, @NotNull String commandName) {
 
-        String cmd = "/" + commandName;
+        final String cmd = "/" + commandName;
         sendMessage(s, "&l=== Yamipa-OG Plugin Help ===");
         sendMessage(s, "&b" + cmd + "&r - Show this help");
         if (s.hasPermission("yamipa.command.clear") || s.hasPermission("yamipa.clear")) {
@@ -104,8 +113,8 @@ public class ImageCommand {
 
     public static void listImages(@NotNull CommandSender sender, int page) {
 
-        String[] filenames = YamipaPlugin.getInstance().getStorage().getAllFilenames();
-        int numOfImages = filenames.length;
+        final String[] filenames = YamipaPlugin.getInstance().getStorage().getAllFilenames();
+        final int numOfImages = filenames.length;
 
         // Are there any images available?
         if (numOfImages == 0) {
@@ -116,7 +125,7 @@ public class ImageCommand {
         }
 
         // Is the page number valid?
-        int firstImageIndex = Math.max(page - 1, 0) * ITEMS_PER_PAGE;
+        final int firstImageIndex = Math.max(page - 1, 0) * ITEMS_PER_PAGE;
         if (firstImageIndex >= numOfImages) {
 
             sendMessage(sender, "&cPage " + page + " not found");
@@ -125,10 +134,10 @@ public class ImageCommand {
         }
 
         // Render list of images
-        int stopImageIndex = (page == 0) ? numOfImages : Math.min(numOfImages, firstImageIndex + ITEMS_PER_PAGE);
+        final int stopImageIndex = (page == 0) ? numOfImages : Math.min(numOfImages, firstImageIndex + ITEMS_PER_PAGE);
         if (page > 0) {
 
-            int maxPage = (int) Math.ceil((float) numOfImages / ITEMS_PER_PAGE);
+            final int maxPage = (int) Math.ceil((float) numOfImages / ITEMS_PER_PAGE);
             sendMessage(sender, "=== Page " + page + " out of " + maxPage + " ===");
 
         }
@@ -143,11 +152,11 @@ public class ImageCommand {
 
     public static void downloadImage(@NotNull CommandSender sender, @NotNull String rawUrl, @NotNull String filename) {
 
-        YamipaPlugin plugin = YamipaPlugin.getInstance();
+        final YamipaPlugin plugin = YamipaPlugin.getInstance();
 
         // Validate destination file
-        Path basePath = Paths.get(plugin.getStorage().getBasePath());
-        Path destPath = basePath.resolve(filename);
+        final Path basePath = Paths.get(plugin.getStorage().getBasePath());
+        final Path destPath = basePath.resolve(filename);
         if (!destPath.getParent().equals(basePath)) {
 
             sendMessage(sender, "&cNot a valid destination filename");
@@ -168,22 +177,21 @@ public class ImageCommand {
         try {
 
             url = new URL(rawUrl);
-
             // Giphy.com
-            if (url.getHost().equals("giphy.com")) {
+            if ("giphy.com".equals(url.getHost())) {
 
-                String path = url.getPath();
-                String id = path.substring(path.lastIndexOf('-') + 1);
+                final String path = url.getPath();
+                final String id = StringUtils.substring(path, path.lastIndexOf('-') + 1);
                 url = new URL("https://media.giphy.com/media/" + id + "/giphy.gif");
                 referrer = "https://giphy.com/";
 
             }
 
             // Imgur.com
-            if (url.getHost().equals("imgur.com")) {
+            if ("imgur.com".equals(url.getHost())) {
 
-                String[] parts = url.getPath().replaceAll("^/|/$", "").split("/");
-                if (parts.length == 2 && (parts[0].equals("a") || parts[0].equals("gallery"))) {
+                final String[] parts = url.getPath().replaceAll("^/|/$", "").split("/");
+                if (parts.length == 2 && ("a".equals(parts[0]) || "gallery".equals(parts[0]))) {
 
                     url = new URL("https://imgur.com/a/" + parts[1] + "/zip");
                     referrer = "https://imgur.com/a/" + parts[1];
@@ -197,7 +205,7 @@ public class ImageCommand {
 
             }
 
-        } catch (MalformedURLException e) {
+        } catch (MalformedURLException malformedURLException) {
 
             sendMessage(sender, "&cThe remote URL is not valid");
             return;
@@ -211,10 +219,10 @@ public class ImageCommand {
 
             try {
 
-                URLConnection conn = finalUrl.openConnection();
-                PluginDescriptionFile desc = plugin.getDescription();
+                final URLConnection conn = finalUrl.openConnection();
                 conn.setRequestProperty("Accept", "*/*");
-                conn.setRequestProperty("User-Agent", desc.getName() + "/" + desc.getVersion());
+                conn.setRequestProperty("User-Agent",
+                        plugin.getPluginMeta().getName() + "/" + plugin.getPluginMeta().getVersion());
                 if (finalReferrer != null) {
 
                     conn.setRequestProperty("Referer", finalReferrer);
@@ -259,7 +267,7 @@ public class ImageCommand {
     public static void placeImage(@NotNull Player player, @NotNull ImageFile image, int width, int height, int flags) {
 
         // Get image size in blocks
-        Dimension sizeInPixels = image.getSize();
+        final Dimension sizeInPixels = image.getSize();
         if (sizeInPixels == null) {
 
             UtilitiesOG.trueogMessage(player, "&cThe requested file is not a valid image");
@@ -270,12 +278,8 @@ public class ImageCommand {
         final int finalHeight = (height == 0) ? FakeImage.getProportionalHeight(sizeInPixels, width) : height;
 
         // Ask player where to place image
-        SelectBlockTask task = new SelectBlockTask(player);
-        task.onSuccess((location, face) -> {
-
-            placeImage(player, image, width, finalHeight, flags, location, face);
-
-        });
+        final SelectBlockTask task = new SelectBlockTask(player);
+        task.onSuccess((location, face) -> placeImage(player, image, width, finalHeight, flags, location, face));
         task.onFailure(() -> ActionBar.send(player, "&cImage placing canceled"));
         task.run("Right click a block to continue");
 
@@ -285,11 +289,11 @@ public class ImageCommand {
             @NotNull Location location, @NotNull BlockFace face)
     {
 
-        ImageRenderer renderer = YamipaPlugin.getInstance().getRenderer();
+        final ImageRenderer renderer = YamipaPlugin.getInstance().getRenderer();
 
         // Create new fake image instance
-        Rotation rotation = FakeImage.getRotationFromPlayerEyesight(face, player.getEyeLocation());
-        FakeImage fakeImage = new FakeImage(image.getName(), location, face, rotation, width, height, new Date(),
+        final Rotation rotation = FakeImage.getRotationFromPlayerEyesight(face, player.getEyeLocation());
+        final FakeImage fakeImage = new FakeImage(image.getName(), location, face, rotation, width, height, new Date(),
                 player, flags);
 
         // Make sure image can be placed
@@ -312,7 +316,7 @@ public class ImageCommand {
         }
 
         // Show loading status to player
-        ActionBar loadingActionBar = ActionBar.repeat(player, "&bLoading image...");
+        final ActionBar loadingActionBar = ActionBar.repeat(player, "&bLoading image...");
         fakeImage.setOnLoadedListener(loadingActionBar::clear);
 
         // Add fake image to renderer
@@ -323,10 +327,10 @@ public class ImageCommand {
 
     public static void removeImage(@NotNull Player player) {
 
-        SelectBlockTask task = new SelectBlockTask(player);
+        final SelectBlockTask task = new SelectBlockTask(player);
         task.onSuccess((location, face) -> {
 
-            FakeImage image = YamipaPlugin.getInstance().getRenderer().getImage(location, face);
+            final FakeImage image = YamipaPlugin.getInstance().getRenderer().getImage(location, face);
             if (image == null) {
 
                 ActionBar.send(player, "&cThat is not a valid image!");
@@ -348,6 +352,7 @@ public class ImageCommand {
             removeImage(player, image);
 
         });
+
         task.onFailure(() -> ActionBar.send(player, "&cImage removing canceled"));
         task.run("Right click an image to continue");
 
@@ -377,24 +382,23 @@ public class ImageCommand {
             @Nullable OfflinePlayer placedBy)
     {
 
-        ImageRenderer renderer = YamipaPlugin.getInstance().getRenderer();
+        final ImageRenderer renderer = YamipaPlugin.getInstance().getRenderer();
 
         // Get images in area
-        Set<FakeImage> images = renderer.getImages(origin.getWorld(), origin.getBlockX() - radius + 1,
+        final Set<FakeImage> images = renderer.getImages(origin.getWorld(), origin.getBlockX() - radius + 1,
                 origin.getBlockX() + radius - 1, origin.getBlockZ() - radius + 1, origin.getBlockZ() + radius - 1);
 
         // Filter out images not placed by targeted player
         if (placedBy != null) {
 
-            UUID target = placedBy.getUniqueId();
+            final UUID target = placedBy.getUniqueId();
             images.removeIf(image -> !target.equals(image.getPlacedBy().getUniqueId()));
 
         }
 
         // Filter out images outside the permission scope of the sender
-        if (sender instanceof Player) {
+        if (sender instanceof Player senderAsPlayer) {
 
-            Player senderAsPlayer = (Player) sender;
             images.removeIf(image -> {
 
                 for (Location loc : image.getAllLocations()) {
@@ -414,11 +418,7 @@ public class ImageCommand {
         }
 
         // Remove found images
-        for (FakeImage image : images) {
-
-            renderer.removeImage(image);
-
-        }
+        images.forEach(renderer::removeImage);
 
         sendMessage(sender, "Removed " + images.size() + " placed image(s)");
 
@@ -426,13 +426,13 @@ public class ImageCommand {
 
     public static void describeImage(@NotNull Player player) {
 
-        ImageRenderer renderer = YamipaPlugin.getInstance().getRenderer();
+        final ImageRenderer renderer = YamipaPlugin.getInstance().getRenderer();
 
         // Ask user to select fake image
-        SelectBlockTask task = new SelectBlockTask(player);
+        final SelectBlockTask task = new SelectBlockTask(player);
         task.onSuccess((location, face) -> {
 
-            FakeImage image = renderer.getImage(location, face);
+            final FakeImage image = renderer.getImage(location, face);
             if (image == null) {
 
                 ActionBar.send(player, "&cThat is not a valid image!");
@@ -445,27 +445,26 @@ public class ImageCommand {
 
             // Basic information
             UtilitiesOG.trueogMessage(player, "&6Filename: &r" + image.getFilename());
-            UtilitiesOG.trueogMessage(player,
-                    "&6World: &r" + image.getLocation().getChunk().getWorld().getName());
-            UtilitiesOG.trueogMessage(player, "&6Coordinates: &r" + image.getLocation().getBlockX()
-                    + ", " + image.getLocation().getBlockY() + ", " + image.getLocation().getBlockZ());
+            UtilitiesOG.trueogMessage(player, "&6World: &r" + image.getLocation().getChunk().getWorld().getName());
+            UtilitiesOG.trueogMessage(player, "&6Coordinates: &r" + image.getLocation().getBlockX() + ", "
+                    + image.getLocation().getBlockY() + ", " + image.getLocation().getBlockZ());
             UtilitiesOG.trueogMessage(player, "&6Block Face: &r" + image.getBlockFace());
             UtilitiesOG.trueogMessage(player, "&6Rotation: &r" + image.getRotation());
             UtilitiesOG.trueogMessage(player,
                     "&6Dimensions: &r" + image.getWidth() + "x" + image.getHeight() + " blocks");
 
             // Speed
-            int delay = image.getDelay() * 50;
-            String delayStr = (delay > 0) ? delay + " ms per step" : "&7N/A";
+            final int delay = image.getDelay() * 50;
+            final String delayStr = (delay > 0) ? delay + " ms per step" : "&7N/A";
             UtilitiesOG.trueogMessage(player, "&6Speed: &r" + delayStr);
 
             // Placed At
-            String dateStr = (image.getPlacedAt() == null) ? "&7Some point in time"
+            final String dateStr = (image.getPlacedAt() == null) ? "&7Some point in time"
                     : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z").format(image.getPlacedAt());
             UtilitiesOG.trueogMessage(player, "&6Placed At: &r" + dateStr);
 
             // Placed By
-            String playerStr;
+            final String playerStr;
             if (image.getPlacedBy().getUniqueId().equals(FakeImage.UNKNOWN_PLAYER_ID)) {
 
                 playerStr = "&7Someone";
@@ -508,7 +507,7 @@ public class ImageCommand {
 
             }
 
-            if (flagsStr.isEmpty()) {
+            if (StringUtils.isEmpty(flagsStr)) {
 
                 flagsStr = "&7N/A";
 
@@ -524,8 +523,8 @@ public class ImageCommand {
 
     public static void showTopPlayers(@NotNull CommandSender sender) {
 
-        UUID senderId = (sender instanceof Player) ? ((Player) sender).getUniqueId() : null;
-        Map<OfflinePlayer, Integer> stats = YamipaPlugin.getInstance().getRenderer().getImagesCountByPlayer();
+        final UUID senderId = (sender instanceof Player) ? ((Player) sender).getUniqueId() : null;
+        final Map<OfflinePlayer, Integer> stats = YamipaPlugin.getInstance().getRenderer().getImagesCountByPlayer();
 
         // Render header
         sendMessage(sender, "=== Top players with the most placed images ===");
@@ -541,8 +540,8 @@ public class ImageCommand {
         boolean hasShownSender = (senderId == null); // Assume sender has already been shown if it's not a player
         for (Map.Entry<OfflinePlayer, Integer> item : stats.entrySet()) {
 
-            OfflinePlayer player = item.getKey();
-            int value = item.getValue();
+            final OfflinePlayer player = item.getKey();
+            final int value = item.getValue();
             ++rank;
 
             // Skip line if irrelevant
@@ -561,7 +560,8 @@ public class ImageCommand {
             }
 
             // Prepare player name or UUID
-            String playerName = (player.getName() == null) ? "&6" + player.getUniqueId() : "&a" + player.getName();
+            final String playerName = (player.getName() == null) ? "&6" + player.getUniqueId()
+                    : "&a" + player.getName();
 
             // Render player line
             sendMessage(sender, "&l" + (rank > 1000 ? "1000+" : rank) + "&r. " + playerName + "&r&7 - " + value + " "
@@ -577,7 +577,7 @@ public class ImageCommand {
     {
 
         // Get image size in blocks
-        Dimension sizeInPixels = image.getSize();
+        final Dimension sizeInPixels = image.getSize();
         if (sizeInPixels == null) {
 
             sendMessage(sender, "&cThe requested file is not a valid image");
@@ -592,7 +592,7 @@ public class ImageCommand {
         }
 
         // Create item stack
-        ItemStack itemStack = ItemService.getImageItem(image, amount, width, height, flags);
+        final ItemStack itemStack = ItemService.getImageItem(image, amount, width, height, flags);
 
         // Add item stack to player's inventory
         player.getInventory().addItem(itemStack);

@@ -1,6 +1,5 @@
 package io.josemmo.bukkit.plugin.utils;
 
-import org.jetbrains.annotations.NotNull;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -11,6 +10,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
+
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 public class CsvConfiguration {
 
@@ -48,17 +50,20 @@ public class CsvConfiguration {
      */
     public void load(@NotNull String path) throws IOException {
 
-        Stream<String> stream = Files.lines(Paths.get(path), CHARSET);
-        stream.forEach(line -> {
+        try (Stream<String> stream = Files.lines(Paths.get(path), CHARSET)) {
 
-            line = line.trim();
-            if (!line.isEmpty()) {
+            stream.forEach(line -> {
 
-                addRow(line.split(COLUMN_DELIMITER));
+                line = StringUtils.trim(line);
+                if (!StringUtils.isEmpty(line)) {
 
-            }
+                    addRow(line.split(COLUMN_DELIMITER));
 
-        });
+                }
+
+            });
+
+        }
 
     }
 

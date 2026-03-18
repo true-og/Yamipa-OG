@@ -1,13 +1,9 @@
 package io.josemmo.bukkit.plugin.renderer;
 
-import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.utility.MinecraftReflection;
-import com.comphenix.protocol.wrappers.nbt.NbtCompound;
-import com.comphenix.protocol.wrappers.nbt.NbtFactory;
-import io.josemmo.bukkit.plugin.packets.DestroyEntityPacket;
-import io.josemmo.bukkit.plugin.packets.EntityMetadataPacket;
-import io.josemmo.bukkit.plugin.packets.SpawnEntityPacket;
-import io.josemmo.bukkit.plugin.utils.Internals;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Rotation;
@@ -16,9 +12,16 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.utility.MinecraftReflection;
+import com.comphenix.protocol.wrappers.nbt.NbtCompound;
+import com.comphenix.protocol.wrappers.nbt.NbtFactory;
+
+import io.josemmo.bukkit.plugin.packets.DestroyEntityPacket;
+import io.josemmo.bukkit.plugin.packets.EntityMetadataPacket;
+import io.josemmo.bukkit.plugin.packets.SpawnEntityPacket;
+import io.josemmo.bukkit.plugin.utils.Internals;
 
 public class FakeItemFrame extends FakeEntity {
 
@@ -131,11 +134,13 @@ public class FakeItemFrame extends FakeEntity {
                 break;
             case SOUTH:
                 ++z;
+            default:
+                break;
 
         }
 
         // Create item frame entity
-        SpawnEntityPacket framePacket = new SpawnEntityPacket();
+        final SpawnEntityPacket framePacket = new SpawnEntityPacket();
         framePacket.setId(id)
                 .setEntityType((glowing && SUPPORTS_GLOWING) ? EntityType.GLOW_ITEM_FRAME : EntityType.ITEM_FRAME)
                 .setPosition(x, y, z).setRotation(pitch, yaw).setData(orientation);
@@ -152,10 +157,10 @@ public class FakeItemFrame extends FakeEntity {
      */
     public @NotNull List<PacketContainer> getRenderPackets(@NotNull Player player, int step) {
 
-        List<PacketContainer> packets = new ArrayList<>(2);
+        final List<PacketContainer> packets = new ArrayList<>(2);
 
         // Enqueue map pixels packet (if needed)
-        boolean mustSendPixels = maps[step].requestResend(player);
+        final boolean mustSendPixels = maps[step].requestResend(player);
         if (mustSendPixels) {
 
             packets.add(maps[step].getPixelsPacket());
@@ -163,13 +168,13 @@ public class FakeItemFrame extends FakeEntity {
         }
 
         // Create and attach filled map
-        ItemStack itemStack = MinecraftReflection.getBukkitItemStack(new ItemStack(Material.FILLED_MAP));
-        NbtCompound itemStackNbt = NbtFactory.ofCompound("tag");
+        final ItemStack itemStack = MinecraftReflection.getBukkitItemStack(new ItemStack(Material.FILLED_MAP));
+        final NbtCompound itemStackNbt = NbtFactory.ofCompound("tag");
         itemStackNbt.put("map", maps[step].getId());
         NbtFactory.setItemTag(itemStack, itemStackNbt);
 
         // Build entity metadata packet
-        EntityMetadataPacket metadataPacket = new EntityMetadataPacket();
+        final EntityMetadataPacket metadataPacket = new EntityMetadataPacket();
         metadataPacket.setId(id).setInvisible(true).setItem(itemStack).setRotation(rotation).build();
         packets.add(metadataPacket);
 
@@ -184,7 +189,7 @@ public class FakeItemFrame extends FakeEntity {
      */
     public @NotNull DestroyEntityPacket getDestroyPacket() {
 
-        DestroyEntityPacket destroyPacket = new DestroyEntityPacket();
+        final DestroyEntityPacket destroyPacket = new DestroyEntityPacket();
         destroyPacket.setId(id);
         return destroyPacket;
 
