@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 public class ImageCommandBridge {
 
     public static final String COMMAND_NAME = "yamipa";
-    public static final String[] COMMAND_ALIASES = new String[] { "image", "images" };
+    public static final String[] COMMAND_ALIASES = new String[] { "image" };
 
     /**
      * Register command
@@ -54,6 +54,16 @@ public class ImageCommandBridge {
 
             }
 
+            try {
+
+                Internals.syncCommands();
+
+            } catch (RuntimeException e) {
+
+                plugin.warning("Failed to synchronize Bukkit commands with Brigadier");
+                plugin.log(java.util.logging.Level.FINE, e.getMessage(), e);
+
+            }
             plugin.fine("Fixed command permissions");
 
         });
